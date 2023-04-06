@@ -17,6 +17,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>product-service</module>
+        <module>order-service</module>
+        <module>inverntory-service</module>
     </modules>
 
     <properties>
