@@ -1,4 +1,4 @@
-package com.bikash.inventoryservice.model;
+package com.bikash.inventoryservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

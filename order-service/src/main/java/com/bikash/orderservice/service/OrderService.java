@@ -1,5 +1,7 @@
 package com.bikash.orderservice.service;
 
+import com.bikash.orderservice.config.WebClientConfig;
+import com.bikash.orderservice.dto.InventoryResponse;
 import com.bikash.orderservice.dto.OrderRequest;
 import com.bikash.orderservice.dto.OrderResponse;
 import com.bikash.orderservice.model.Order;
@@ -7,9 +9,13 @@ import com.bikash.orderservice.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,14 +26,31 @@ public class OrderService {
     @Autowired
     private OrderRepository repo;
 
-    public void createOrder(OrderRequest orderRequest){
+    @Autowired
+    private WebClient.Builder webClient;
+
+    public String createOrder(OrderRequest orderRequest){
         Order order = Order.builder()
                 .name(orderRequest.getName())
                 .status("Order Placed")
                 .build();
+        /* System needs to check if the order is available in the inventory*/
+        List<String> orderNames = new ArrayList<>();
+        orderNames.add(order.getName());
 
-        repo.save(order);
-        log.info("Order Number {} has been placed successfully. Thank you for Ordering {}", order.getId(), order.getName());
+
+        Boolean isPresent = webClient.build().get()
+                .uri("http://inventory-service/api/inventory/" + orderRequest.getName())
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+
+        if (isPresent)
+        {
+            repo.save(order);
+            return "Order has been placed successfully. Thank you for Ordering!";
+        }else
+            throw new IllegalArgumentException("Order is not present");
     }
 
     public List<OrderResponse> getAllOrdersByStatus(String status){
@@ -39,7 +62,7 @@ public class OrderService {
     }
 
     public List<OrderResponse> getAllOrders(){
-        log.info("Fetching all the placed Orders!");
+        log.info("Fetching all the Orders!");
         return repo.findAll()
                 .stream()
                 .map(order -> mapOrderToOrderResponse(order))
