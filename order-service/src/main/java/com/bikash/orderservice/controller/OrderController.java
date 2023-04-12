@@ -4,6 +4,7 @@ import com.bikash.orderservice.dto.OrderRequest;
 import com.bikash.orderservice.dto.OrderResponse;
 import com.bikash.orderservice.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @CircuitBreaker(name="inventory", fallbackMethod = "fallBackMethod")
     @TimeLimiter(name = "inventory")
+    @Retry(name="inventory")
     public CompletableFuture<String> saveOrder(@RequestBody OrderRequest orderRequest){
         return CompletableFuture.supplyAsync(()->orderService.createOrder(orderRequest));
     }

@@ -24,12 +24,5 @@ public class InventoryController {
         log.info("Order Name is {} ", inventoryService.isProductPresent(orderName).getOrderName());
         return !inventoryService.isProductPresent(orderName).getOrderName().isEmpty();
     }
-
-//    @PostMapping("/api/inventory")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public String saveInventory(@RequestBody InventoryRequest inventoryRequest){
-//        inventoryService.addInventory(inventoryRequest);
-//        return "Inventory has been successfully added.";
-//    }
 }
 
